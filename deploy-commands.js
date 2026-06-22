@@ -1,0 +1,6 @@
+
+{
+  "welcomeChannelId": "",
+  "devlogChannelId": "",
+  "staffRoleId": ""
+}
