@@ -4,7 +4,7 @@ const { Colors, successEmbed, errorEmbed } = require('../utils/embeds');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('unmute')
-    .setDescription('Unmute a member')
+    .setDescription('Unmute a member (removes role & timeout)')
     .addUserOption(option =>
       option.setName('member')
         .setDescription('Member to unmute')
@@ -20,15 +20,19 @@ module.exports = {
       });
     }
 
-    if (!targetMember.isCommunicationDisabled()) {
-      return interaction.reply({ 
-        embeds: [errorEmbed(interaction, 'Error', 'This member is not muted!')],
-        ephemeral: true 
-      });
-    }
-
     try {
-      await targetMember.timeout(null);
+      // Find muted role
+      const mutedRole = interaction.guild.roles.cache.find(r => r.name === 'Muted');
+      
+      // Remove muted role if exists
+      if (mutedRole && targetMember.roles.cache.has(mutedRole.id)) {
+        await targetMember.roles.remove(mutedRole);
+      }
+      
+      // Remove timeout if active
+      if (targetMember.isCommunicationDisabled()) {
+        await targetMember.timeout(null);
+      }
       
       const unmuteEmbed = new EmbedBuilder()
         .setColor(Colors.SUCCESS)

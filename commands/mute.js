@@ -1,12 +1,10 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { Colors, successEmbed, errorEmbed } = require('../utils/embeds');
-const fs = require('fs');
-const path = require('path');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('mute')
-    .setDescription('Mute a member')
+    .setDescription('Mute a member (timeout + role)')
     .addUserOption(option =>
       option.setName('member')
         .setDescription('Member to mute')
@@ -16,8 +14,9 @@ module.exports = {
         .setDescription('Reason for the mute'))
     .addIntegerOption(option =>
       option.setName('duration')
-        .setDescription('Duration in minutes (optional, permanent if not set)')
-        .setMinValue(1))
+        .setDescription('Duration in minutes (optional, max 40320)')
+        .setMinValue(1)
+        .setMaxValue(40320))
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
   async execute(interaction) {
     const targetMember = interaction.options.getMember('member');
@@ -53,7 +52,45 @@ module.exports = {
     }
 
     try {
-      await targetMember.timeout(duration ? duration * 60 * 1000 : null, reason);
+      // First, try to find or create a "Muted" role
+      let mutedRole = interaction.guild.roles.cache.find(r => r.name === 'Muted');
+      
+      if (!mutedRole) {
+        // Create muted role if it doesn't exist
+        mutedRole = await interaction.guild.roles.create({
+          name: 'Muted',
+          color: Colors.ERROR,
+          permissions: [],
+          reason: 'Created for mute command'
+        });
+
+        // Apply role permissions to all channels
+        for (const [, channel] of interaction.guild.channels.cache) {
+          try {
+            await channel.permissionOverwrites.create(mutedRole, {
+              SendMessages: false,
+              Speak: false,
+              SendMessagesInThreads: false,
+              AddReactions: false
+            });
+          } catch (err) {
+            console.error('Could not update channel permissions:', err);
+          }
+        }
+      }
+
+      // Add the muted role
+      await targetMember.roles.add(mutedRole, reason);
+
+      // Try to apply timeout if duration is specified
+      if (duration) {
+        const timeoutMs = duration * 60 * 1000;
+        try {
+          await targetMember.timeout(timeoutMs, reason);
+        } catch (timeoutErr) {
+          console.error('Timeout failed, but role still applied:', timeoutErr);
+        }
+      }
       
       const muteEmbed = new EmbedBuilder()
         .setColor(Colors.WARNING)
@@ -62,7 +99,7 @@ module.exports = {
           { name: '👤 Member', value: `${targetMember.user.tag} (${targetMember.user.id})`, inline: true },
           { name: '👮 Moderator', value: `${interaction.user.tag}`, inline: true },
           { name: '📅 Reason', value: reason, inline: false },
-          { name: '⏱️ Duration', value: duration ? `${duration} minute(s)` : 'Permanent', inline: true }
+          { name: '⏱️ Duration', value: duration ? `${duration} minute(s)` : 'Until manually unmuted', inline: true }
         )
         .setThumbnail(targetMember.user.displayAvatarURL({ dynamic: true }))
         .setTimestamp()
