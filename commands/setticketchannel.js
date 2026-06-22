@@ -1,15 +1,15 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const { successEmbed, errorEmbed } = require('../utils/embeds');
+const { successEmbed } = require('../utils/embeds');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('setwelcome')
-    .setDescription('Set the welcome channel')
+    .setName('setticketchannel')
+    .setDescription('Set the channel where tickets can be created')
     .addChannelOption(option =>
       option.setName('channel')
-        .setDescription('Channel to send welcome messages')
+        .setDescription('Channel for ticket creation interface')
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   async execute(interaction) {
@@ -17,11 +17,12 @@ module.exports = {
     const configPath = path.join(__dirname, '../config.json');
     const config = require(configPath);
     
-    config.welcomeChannelId = channel.id;
+    config.ticketChannelId = channel.id;
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     
     await interaction.reply({ 
-      embeds: [successEmbed(interaction, 'Welcome Channel Set', `Welcome messages will now be sent to ${channel}!`)] 
+      embeds: [successEmbed(interaction, 'Ticket Channel Set', `Ticket interface will be created in ${channel}!`)],
+      ephemeral: true
     });
   },
 };

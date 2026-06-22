@@ -1,49 +1,65 @@
-
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const config = require('../config.json');
+const { Colors, successEmbed, errorEmbed } = require('../utils/embeds');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('devlog')
-    .setDescription('Envia um devlog para o canal designado')
+    .setDescription('Send a devlog to the designated channel')
     .addStringOption(option =>
-      option.setName('titulo')
-        .setDescription('Título do devlog')
+      option.setName('title')
+        .setDescription('Title of the devlog')
         .setRequired(true))
     .addStringOption(option =>
-      option.setName('conteudo')
-        .setDescription('Conteúdo do devlog')
+      option.setName('content')
+        .setDescription('Content of the devlog')
         .setRequired(true))
     .addAttachmentOption(option =>
-      option.setName('imagem')
-        .setDescription('Imagem para acompanhar o devlog (opcional)'))
+      option.setName('image')
+        .setDescription('Image to accompany the devlog (optional)'))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
   async execute(interaction) {
     if (!config.devlogChannelId) {
-      return interaction.reply({ content: 'Canal de devlogs não configurado! Use /setdevlog.', ephemeral: true });
+      return interaction.reply({ 
+        embeds: [errorEmbed(interaction, 'Error', 'Devlog channel not configured! Use /setdevlog.')],
+        ephemeral: true 
+      });
     }
 
     const channel = interaction.guild.channels.cache.get(config.devlogChannelId);
     if (!channel) {
-      return interaction.reply({ content: 'Canal de devlogs não encontrado!', ephemeral: true });
+      return interaction.reply({ 
+        embeds: [errorEmbed(interaction, 'Error', 'Devlog channel not found!')],
+        ephemeral: true 
+      });
     }
 
-    const title = interaction.options.getString('titulo');
-    const content = interaction.options.getString('conteudo');
-    const image = interaction.options.getAttachment('imagem');
+    const title = interaction.options.getString('title');
+    const content = interaction.options.getString('content');
+    const image = interaction.options.getAttachment('image');
 
     const embed = new EmbedBuilder()
-      .setColor('#8B5CF6')
+      .setColor(Colors.DEVLOG)
       .setTitle(`📝 Devlog: ${title}`)
       .setDescription(content)
-      .setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() })
-      .setTimestamp();
+      .setAuthor({ 
+        name: interaction.user.tag, 
+        iconURL: interaction.user.displayAvatarURL({ dynamic: true }) 
+      })
+      .setTimestamp()
+      .setFooter({ 
+        text: 'Limaris Studios Development Update', 
+        iconURL: interaction.guild.iconURL({ dynamic: true }) 
+      });
 
     if (image) {
       embed.setImage(image.url);
     }
 
     await channel.send({ embeds: [embed] });
-    await interaction.reply({ content: 'Devlog enviado com sucesso!', ephemeral: true });
+    await interaction.reply({ 
+      embeds: [successEmbed(interaction, 'Devlog Sent', 'Your devlog has been posted successfully!')],
+      ephemeral: true 
+    });
   },
 };

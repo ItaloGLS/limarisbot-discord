@@ -1,79 +1,82 @@
+# Limaris Studios Discord Bot
 
-# Limaris Studios - Bot do Discord
+A professional Discord bot for the Limaris Studios community, featuring moderation, welcome messages, devlogs, tickets, and announcements!
 
-Bot de gerenciamento de servidor para a Limaris Studios, com funcionalidades de boas-vindas, moderação e devlogs.
+## Features
 
-## Funcionalidades
+- 🎉 **Automatic Welcome Messages**: Beautiful, detailed welcome messages for new members
+- 🛡️ **Moderation Tools**: Ban, kick, mute, unmute, and clear messages
+- 📝 **Devlog System**: Post professional development updates
+- 🎫 **Ticket System**: Easy-to-use support ticket system with buttons
+- 📢 **Mass Announcements**: Send DM announcements to all server members
+- ℹ️ **Information Commands**: Server info, user info, and bot status
+- 🎮 **Fun Commands**: Magic 8-ball for entertainment
+- ⚙️ **Configuration**: Easy channel setup for all features
 
-- 🎉 Sistema de boas-vindas automático
-- 🔨 Comandos de moderação (banir, expulsar, promover)
-- 📝 Sistema de devlogs
-- Configuração fácil via comandos slash
+## Commands
 
-## Configuração
+### Moderation
+- `/ban <member> [reason] [delete-messages]` - Ban a member with optional message deletion
+- `/kick <member> [reason]` - Kick a member
+- `/mute <member> [reason] [duration]` - Mute a member temporarily or permanently
+- `/unmute <member>` - Unmute a member
+- `/promote <member> <role>` - Assign a role to a member
+- `/clear <amount> [user]` - Purge messages from a channel
 
-1. **Crie um bot no Discord Developer Portal**
-   - Acesse https://discord.com/developers/applications
-   - Crie uma nova aplicação
-   - Vá para a seção "Bot" e clique em "Add Bot"
-   - Copie o token do bot (clique em "Reset Token")
-   - Vá para a seção "OAuth2" → "URL Generator"
-   - Marque as opções: `bot` e `applications.commands`
-   - Marque as permissões: `Administrator` (ou as permissões específicas que o bot precisa)
-   - Copie a URL gerada e adicione o bot ao seu servidor
+### Configuration
+- `/setwelcome <channel>` - Set the welcome channel
+- `/setdevlog <channel>` - Set the devlog channel
+- `/setticketchannel <channel>` - Set the ticket creation channel
+- `/setuptickets` - Create the ticket interface button
 
-2. **Configuração do projeto**
-   - Renomeie o arquivo `.env.example` para `.env`
-   - Preencha as variáveis:
-     - `DISCORD_TOKEN`: Token do seu bot
-     - `CLIENT_ID`: ID da sua aplicação (disponível no Discord Developer Portal)
-     - `GUILD_ID`: ID do seu servidor Discord (ativar o Modo Desenvolvedor no Discord → Clicar com o botão direito no servidor → "Copiar ID")
+### Announcement
+- `/announce <title> <message> [image]` - Send a professional announcement via DM to all members (Admin only)
 
-3. **Instale as dependências**
-   ```bash
-   npm install
-   ```
+### Information
+- `/serverinfo` - Show detailed server information
+- `/userinfo [user]` - Show user information (defaults to yourself)
+- `/ping` - Check the bot's latency
+- `/help` - Show all available commands
 
-4. **Registre os comandos**
-   ```bash
-   node deploy-commands.js
-   ```
+### Other
+- `/devlog <title> <content> [image]` - Send a professional devlog
+- `/8ball <question>` - Ask the magic 8-ball a question
 
-5. **Inicie o bot**
-   ```bash
-   node index.js
-   ```
+## Ticket System Usage
 
-## Comandos Disponíveis
+1. **Set Ticket Channel**: Use `/setticketchannel` to set the channel where tickets can be created
+2. **Setup Ticket Interface**: Use `/setuptickets` to create the ticket creation button
+3. **Create Ticket**: Members click the "Create Ticket" button to open a support ticket
+4. **Close Ticket**: Click the close button in the ticket channel to close and delete it
 
-- `/setwelcome [canal]`: Define o canal de boas-vindas
-- `/setdevlog [canal]`: Define o canal de devlogs
-- `/ban [membro] [motivo]`: Bane um membro
-- `/kick [membro] [motivo]`: Expulsa um membro
-- `/promover [membro] [cargo]`: Atribui um cargo a um membro
-- `/devlog [titulo] [conteudo] [imagem]`: Envia um devlog
+## Setup
 
-## Hospedagem Gratuita
+1. **Create a Discord Application**: Go to [Discord Developers](https://discord.com/developers/applications) and create a new application.
+2. **Add a Bot**: In the "Bot" tab, click "Add Bot" and copy your bot token.
+3. **Enable Intents**: Enable "Server Members Intent" and "Message Content Intent" in the "Bot" tab.
+4. **Invite the Bot**: Go to "OAuth2" → "URL Generator", check "bot" and "applications.commands", then check the necessary permissions (or Administrator for ease).
+5. **Configure the Bot**:
+   - Rename `.env.example` to `.env`
+   - Fill in your bot token, client ID, and guild ID in the `.env` file
+6. **Install Dependencies**: Run `npm install`
+7. **Deploy Commands**: Run `npm run deploy`
+8. **Start the Bot**: Run `npm start`
 
-Algumas opções de hospedagem gratuita para o seu bot:
+## Hosting on Render
 
-1. **Discloud** (https://discloudbot.com/)
-   - Hospedagem gratuita para bots do Discord
-   - Fácil de usar
-   - Suporta Node.js
+1. **Push to GitHub**: Upload your code to a GitHub repository
+2. **Connect to Render**: Go to [Render](https://render.com/) and create a new "Web Service"
+3. **Configure**:
+   - Connect your GitHub repository
+   - Set the build command to `npm install`
+   - Set the start command to `npm start`
+4. **Environment Variables**: Add your `.env` variables (DISCORD_TOKEN, CLIENT_ID, GUILD_ID) in the Render dashboard
+5. **Deploy**: Click "Create Web Service" and watch your bot go live!
 
-2. **Render** (https://render.com/)
-   - Plano gratuito com limitações
-   - Bom para projetos pequenos
+### Keeping it Online 24/7
 
-3. **Railway** (https://railway.app/)
-   - Créditos gratuitos mensais
-   - Fácil de configurar
+Use a service like [UptimeRobot](https://uptimerobot.com/) to ping your Render web service every 5-10 minutes to prevent it from sleeping.
 
-4. **Replit** (https://replit.com/)
-   - Hospedagem gratuita
-   - Precisa de um "ping" periódico para manter o bot online (você pode usar serviços como UptimeRobot)
-
-## Licença
+## License
 
 ISC

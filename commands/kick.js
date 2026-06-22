@@ -1,45 +1,67 @@
-
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { Colors, errorEmbed } = require('../utils/embeds');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('kick')
-    .setDescription('Expulsa um membro do servidor')
+    .setDescription('Kick a member from the server')
     .addUserOption(option =>
-      option.setName('membro')
-        .setDescription('Membro a ser expulso')
+      option.setName('member')
+        .setDescription('Member to kick')
         .setRequired(true))
     .addStringOption(option =>
-      option.setName('motivo')
-        .setDescription('Motivo da expulsão'))
+      option.setName('reason')
+        .setDescription('Reason for the kick'))
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
   async execute(interaction) {
-    const member = interaction.options.getMember('membro');
-    const reason = interaction.options.getString('motivo') || 'Não especificado';
+    const targetMember = interaction.options.getMember('member');
+    const reason = interaction.options.getString('reason') || 'No reason specified';
 
-    if (!member) {
-      return interaction.reply({ content: 'Membro não encontrado!', ephemeral: true });
+    if (!targetMember) {
+      return interaction.reply({ 
+        embeds: [errorEmbed(interaction, 'Error', 'Member not found!')],
+        ephemeral: true 
+      });
     }
 
-    if (member.id === interaction.user.id) {
-      return interaction.reply({ content: 'Você não pode expulsar a si mesmo!', ephemeral: true });
+    if (targetMember.id === interaction.user.id) {
+      return interaction.reply({ 
+        embeds: [errorEmbed(interaction, 'Error', 'You cannot kick yourself!')],
+        ephemeral: true 
+      });
     }
 
-    if (member.roles.highest.position >= interaction.member.roles.highest.position) {
-      return interaction.reply({ content: 'Você não tem permissão para expulsar este membro!', ephemeral: true });
+    if (targetMember.roles.highest.position >= interaction.member.roles.highest.position && interaction.user.id !== interaction.guild.ownerId) {
+      return interaction.reply({ 
+        embeds: [errorEmbed(interaction, 'Error', 'You cannot kick this member! Their role is higher than or equal to yours.')],
+        ephemeral: true 
+      });
     }
 
-    await member.kick(reason);
-    const embed = new EmbedBuilder()
-      .setColor('#F59E0B')
-      .setTitle('Membro Expulso')
+    if (!targetMember.kickable) {
+      return interaction.reply({ 
+        embeds: [errorEmbed(interaction, 'Error', 'I cannot kick this member! Please check my role position and permissions.')],
+        ephemeral: true 
+      });
+    }
+
+    await targetMember.kick(reason);
+    
+    const kickEmbed = new EmbedBuilder()
+      .setColor(Colors.WARNING)
+      .setTitle('👟 Member Kicked')
       .addFields(
-        { name: 'Membro', value: `${member.user.tag}`, inline: true },
-        { name: 'Moderador', value: `${interaction.user.tag}`, inline: true },
-        { name: 'Motivo', value: reason }
+        { name: '👤 Member', value: `${targetMember.user.tag} (${targetMember.user.id})`, inline: true },
+        { name: '👮 Moderator', value: `${interaction.user.tag}`, inline: true },
+        { name: '📅 Reason', value: reason, inline: false }
       )
-      .setTimestamp();
+      .setThumbnail(targetMember.user.displayAvatarURL({ dynamic: true }))
+      .setTimestamp()
+      .setFooter({ 
+        text: interaction.guild.name, 
+        iconURL: interaction.guild.iconURL({ dynamic: true }) 
+      });
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [kickEmbed] });
   },
 };
