@@ -4,7 +4,7 @@ const { EmbedBuilder } = require('discord.js');
 const { Colors } = require('./embeds');
 require('dotenv').config();
 
-// Load all data files
+// Load all data files with fallbacks
 const faqDataPath = path.join(__dirname, '../data/faq.json');
 const moderationRulesPath = path.join(__dirname, '../data/moderation-rules.json');
 const aiConfigPath = path.join(__dirname, '../data/ai-config.json');
@@ -13,13 +13,24 @@ let faqData, moderationRules, aiConfig;
 
 try {
   faqData = JSON.parse(fs.readFileSync(faqDataPath, 'utf8'));
-  moderationRules = JSON.parse(fs.readFileSync(moderationRulesPath, 'utf8'));
-  aiConfig = JSON.parse(fs.readFileSync(aiConfigPath, 'utf8'));
 } catch (err) {
-  console.error('Error loading data files:', err);
+  console.error('Error loading FAQ data, using defaults:', err);
   faqData = { faqs: [] };
+}
+
+try {
+  moderationRules = JSON.parse(fs.readFileSync(moderationRulesPath, 'utf8'));
+} catch (err) {
+  console.error('Error loading moderation rules, using defaults:', err);
   moderationRules = { prohibited_words: [], rules: [] };
-  aiConfig = { enabled: false };
+}
+
+try {
+  aiConfig = JSON.parse(fs.readFileSync(aiConfigPath, 'utf8'));
+  console.log('✅ AI Config loaded successfully');
+} catch (err) {
+  console.error('Error loading AI config, using defaults:', err);
+  aiConfig = { enabled: false, provider: 'gemini', model: 'gemini-1.5-pro' };
 }
 
 // Initialize AI providers
@@ -33,7 +44,7 @@ try {
     console.log('✅ OpenAI client initialized');
   }
 } catch (err) {
-  console.log('ℹ️ OpenAI not configured');
+  console.log('ℹ️ OpenAI not configured:', err.message);
 }
 
 try {
@@ -43,7 +54,7 @@ try {
     console.log('✅ Gemini client initialized');
   }
 } catch (err) {
-  console.log('ℹ️ Gemini not configured');
+  console.log('ℹ️ Gemini not configured:', err.message);
 }
 
 // ================== LEVEL 1: FAQ SYSTEM ==================
@@ -75,7 +86,15 @@ function createFAQEmbed(faq, member) {
 
 // ================== LEVEL 2: AI SYSTEM ==================
 async function generateAIResponse(message) {
+  console.log('🔍 Generating AI response...');
+  console.log('AI Config:', {
+    enabled: aiConfig.enabled,
+    provider: aiConfig.provider,
+    model: aiConfig.model
+  });
+
   if (!aiConfig.enabled) {
+    console.log('ℹ️ AI is disabled');
     return null;
   }
   
@@ -87,8 +106,10 @@ async function generateAIResponse(message) {
     `.trim();
     
     const systemPrompt = `${aiConfig.system_prompt}\n\nServer Context:\n${serverInfo}`;
+    console.log('📝 Using prompt:', systemPrompt.substring(0, 200) + '...');
     
     if (aiConfig.provider === 'openai' && openaiClient) {
+      console.log('🤖 Using OpenAI...');
       const response = await openaiClient.chat.completions.create({
         model: aiConfig.model || 'gpt-3.5-turbo',
         messages: [
@@ -99,10 +120,16 @@ async function generateAIResponse(message) {
         max_tokens: 500
       });
       
-      return response.choices[0].message.content;
+      const result = response.choices[0].message.content;
+      console.log('✅ OpenAI response received');
+      return result;
     } else if (aiConfig.provider === 'gemini' && geminiClient) {
+      console.log('🤖 Using Gemini...');
+      const modelToUse = aiConfig.model || 'gemini-1.5-pro';
+      console.log('📋 Model:', modelToUse);
+      
       const model = geminiClient.getGenerativeModel({ 
-        model: aiConfig.model || 'gemini-pro' 
+        model: modelToUse 
       });
       
       const result = await model.generateContent(
@@ -110,12 +137,16 @@ async function generateAIResponse(message) {
       );
       
       const response = await result.response;
-      return response.text();
+      const text = response.text();
+      console.log('✅ Gemini response received');
+      return text;
     }
     
+    console.log('⚠️ No AI provider configured');
     return null;
   } catch (error) {
-    console.error('AI Error:', error);
+    console.error('❌ AI Error:', error.message);
+    console.error('❌ Full error:', error);
     return null;
   }
 }
