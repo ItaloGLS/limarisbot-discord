@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "provider": "gemini",
-  "model": "gemini-1.5-pro",
+  "model": "gemini-1.5-pro-latest",
   "system_prompt": "Você é um assistente útil para o servidor Limaris Studios Discord. Responda de forma amigável, profissional e ajude os usuários. Seja conciso e direto. Se não souber algo, recomende criar um ticket. Use em inglês.",
   "moderation": {
     "enabled": false,
