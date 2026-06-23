@@ -125,21 +125,35 @@ async function generateAIResponse(message) {
       return result;
     } else if (aiConfig.provider === 'gemini' && geminiClient) {
       console.log('🤖 Using Gemini...');
-      const modelToUse = aiConfig.model || 'gemini-3.5-flash';
-      console.log('📋 Model:', modelToUse);
       
-      const model = geminiClient.getGenerativeModel({ 
-        model: modelToUse 
-      });
+      // Try models in order of priority (fastest first)
+      const modelsToTry = [
+        'gemini-3.5-flash',
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-pro-latest'
+      ];
       
-      const result = await model.generateContent(
-        `${systemPrompt}\n\nUser: ${message.content}`
-      );
+      for (const modelName of modelsToTry) {
+        try {
+          console.log('📋 Trying model:', modelName);
+          const model = geminiClient.getGenerativeModel({ model: modelName });
+          const result = await model.generateContent(
+            `${systemPrompt}\n\nUser: ${message.content}`
+          );
+          
+          const response = await result.response;
+          const text = response.text();
+          console.log('✅ Gemini response received with model:', modelName);
+          return text;
+        } catch (modelError) {
+          console.log(`⚠️ Model ${modelName} failed, trying next...`);
+          continue;
+        }
+      }
       
-      const response = await result.response;
-      const text = response.text();
-      console.log('✅ Gemini response received');
-      return text;
+      console.log('❌ All Gemini models failed');
+      return null;
     }
     
     console.log('⚠️ No AI provider configured');
