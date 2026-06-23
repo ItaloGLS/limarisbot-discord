@@ -1,0 +1,23 @@
+{
+  "prohibited_words": ["palavrao1", "palavrao2", "spam", "linkmalicioso"],
+  "spam_threshold": 5,
+  "spam_interval": 10000,
+  "rules": [
+    {
+      "name": "Respeito mútuo",
+      "description": "Não seja rude, desrespeitoso ou tóxico com os outros membros."
+    },
+    {
+      "name": "Sem spam",
+      "description": "Não faça spam ou flooding de mensagens repetidas."
+    },
+    {
+      "name": "Conteúdo apropriado",
+      "description": "Não compartilhe conteúdo inadequado, NSFW ou inapropriado."
+    },
+    {
+      "name": "Sigla os canais",
+      "description": "Use cada canal para seu propósito específico."
+    }
+  ]
+}

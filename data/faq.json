@@ -1,0 +1,29 @@
+{
+  "faqs": [
+    {
+      "keywords": ["cargo", "role", "pegar cargo", "ganhar cargo"],
+      "question": "Como pegar cargo?",
+      "answer": "Para pegar cargo, use o comando `/promote` ou contate um moderador!"
+    },
+    {
+      "keywords": ["regras", "rules", "quebrar regra", "regra"],
+      "question": "Quais são as regras?",
+      "answer": "Leia as regras no canal de boas-vindas e siga as diretrizes do servidor. Qualquer dúvida contate a moderação!"
+    },
+    {
+      "keywords": ["ajuda", "help", "duvida", "dúvida"],
+      "question": "Preciso de ajuda",
+      "answer": "Crie um ticket usando o botão no canal de tickets, ou mencione um moderador!"
+    },
+    {
+      "keywords": ["jogo", "game", "limaris", "lançamento", "release"],
+      "question": "Quando o jogo sai?",
+      "answer": "Siga o canal de devlogs para todas as atualizações sobre o nosso jogo!"
+    },
+    {
+      "keywords": ["entrar", "join", "acesso", "canal", "channel"],
+      "question": "Como entro nos canais?",
+      "answer": "Verifique suas permissões e certifique-se de ter passado pelo processo de verificação!"
+    }
+  ]
+}

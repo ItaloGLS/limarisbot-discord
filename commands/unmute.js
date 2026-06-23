@@ -4,12 +4,12 @@ const { Colors, successEmbed, errorEmbed } = require('../utils/embeds');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('unmute')
-    .setDescription('Unmute a member (removes role & timeout)')
+    .setDescription('Unsilence a member in voice channels')
     .addUserOption(option =>
       option.setName('member')
         .setDescription('Member to unmute')
         .setRequired(true))
-    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers),
   async execute(interaction) {
     const targetMember = interaction.options.getMember('member');
 
@@ -20,19 +20,15 @@ module.exports = {
       });
     }
 
+    if (!targetMember.voice.channel) {
+      return interaction.reply({ 
+        embeds: [errorEmbed(interaction, 'Error', 'This member is not in a voice channel!')],
+        ephemeral: true 
+      });
+    }
+
     try {
-      // Find muted role
-      const mutedRole = interaction.guild.roles.cache.find(r => r.name === 'Muted');
-      
-      // Remove muted role if exists
-      if (mutedRole && targetMember.roles.cache.has(mutedRole.id)) {
-        await targetMember.roles.remove(mutedRole);
-      }
-      
-      // Remove timeout if active
-      if (targetMember.isCommunicationDisabled()) {
-        await targetMember.timeout(null);
-      }
+      await targetMember.voice.setMute(false);
       
       const unmuteEmbed = new EmbedBuilder()
         .setColor(Colors.SUCCESS)
@@ -52,7 +48,7 @@ module.exports = {
     } catch (error) {
       console.error(error);
       await interaction.reply({ 
-        embeds: [errorEmbed(interaction, 'Error', 'Failed to unmute the member! Please try again.')],
+        embeds: [errorEmbed(interaction, 'Error', 'Failed to unmute the member!')],
         ephemeral: true 
       });
     }
