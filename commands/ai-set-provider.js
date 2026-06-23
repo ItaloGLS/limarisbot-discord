@@ -19,7 +19,6 @@ module.exports = {
     try {
       const provider = interaction.options.getString('provider');
       
-      // Check if provider is configured
       if (provider === 'openai' && !openaiClient) {
         return interaction.reply({ 
           embeds: [errorEmbed(interaction, 'Error', 'OpenAI not configured! Add OPENAI_API_KEY in .env')],

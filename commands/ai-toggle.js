@@ -15,7 +15,6 @@ module.exports = {
     try {
       const enabled = interaction.options.getBoolean('enabled');
       
-      // Check if any provider is configured
       if (enabled && !openaiClient && !geminiClient) {
         return interaction.reply({ 
           embeds: [errorEmbed(interaction, 'Error', 'No AI provider configured! Add OPENAI_API_KEY or GEMINI_API_KEY in .env')],
@@ -28,7 +27,7 @@ module.exports = {
       
       const status = enabled ? '✅ AI System ENABLED' : '❌ AI System DISABLED';
       await interaction.reply({ 
-        embeds: [successEmbed(interaction, 'AI Status Changed', `${status}!')],
+        embeds: [successEmbed(interaction, 'AI Status Changed', `${status}!`)],
         ephemeral: true 
       });
     } catch (error) {
