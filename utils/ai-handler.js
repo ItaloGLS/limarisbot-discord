@@ -30,7 +30,7 @@ try {
   console.log('✅ AI Config loaded successfully');
 } catch (err) {
   console.error('Error loading AI config, using defaults:', err);
-  aiConfig = { enabled: false, provider: 'gemini', model: 'gemini-1.5-pro-latest' };
+  aiConfig = { enabled: false, provider: 'gemini', model: 'gemini-3.5-flash' };
 }
 
 // Initialize AI providers
@@ -125,7 +125,7 @@ async function generateAIResponse(message) {
       return result;
     } else if (aiConfig.provider === 'gemini' && geminiClient) {
       console.log('🤖 Using Gemini...');
-      const modelToUse = aiConfig.model || 'gemini-1.5-pro-latest';
+      const modelToUse = aiConfig.model || 'gemini-3.5-flash';
       console.log('📋 Model:', modelToUse);
       
       const model = geminiClient.getGenerativeModel({ 
